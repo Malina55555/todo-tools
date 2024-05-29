@@ -1,3 +1,4 @@
+import re
 import psycopg2
 from datetime import datetime
 from psycopg2 import Error
@@ -32,6 +33,12 @@ class TDDB:
     # ---------------ЗАДАЧИ--------------
 
     def new_todo(self, text, deadline=None, important=False):
+        regex1 = "\d\d/\d{2}/\d{4}"
+        regex2 = "\d{4}/\d{2}/\d{2}"
+        if deadline:
+            if not (re.match(regex1, deadline) or re.match(regex2, deadline)):
+                return False
+
         try:
             self.cursor.execute("""INSERT INTO todos (text_todos, id_users) VALUES (%s, %s) RETURNING id_todos""",
                                 (str(text), self.authorised_user,))
@@ -41,11 +48,12 @@ class TDDB:
             if deadline:
                 self.cursor.execute(""" UPDATE todos SET deadline = %s WHERE id_todos=%s""", (str(deadline), id))
                 self.connection.commit()
-                print("Дедлайн записи установлен")
+                #print("Дедлайн записи установлен")
             if important:
                 self.cursor.execute(""" UPDATE todos SET important = %s WHERE id_todos=%s""", (bool(True), id))
                 self.connection.commit()
-                print("Состояние записи \"важно\" применено успешно")
+                #print("Состояние записи \"важно\" применено успешно")
+            return True
 
         except (Exception, Error) as error:
             print("Ошибка при внесении новой записи в PostgreSQL:", error)
@@ -110,6 +118,11 @@ class TDDB:
         return result
 
     def select_by_text_all(self, text="", deadline=None):
+        regex1 = "\d\d/\d{2}/\d{4}"
+        regex2 = "\d{4}/\d{2}/\d{2}"
+        if deadline:
+            if not (re.match(regex1, deadline) or re.match(regex2, deadline)):
+                return False
         try:
             query = """SELECT * FROM todos WHERE id_users=%s AND text_todos LIKE %s """
             if deadline:
@@ -157,7 +170,7 @@ class TDDB:
                 self.cursor.execute("""UPDATE todos SET deadline=%s WHERE id_todos=%s""",
                                     (datetime.strptime(deadline, "%d/%m/%Y").strftime("%Y-%m-%d"), id))
                 self.connection.commit()
-                print("Изменение date прошло успешно")
+                #print("Изменение date прошло успешно")
 
             except (Exception, Error) as error:
                 print("Ошибка при обновлении записи в PostgreSQL:", error)
@@ -180,16 +193,20 @@ class TDDB:
         except (Exception, Error) as error:
             print("Ошибка при обновлении записи в PostgreSQL:", error)
 
-    def update_deadline_by_id(self, id, deadline="None"):
+    def update_deadline_by_id(self, id, deadline="- -/- -/- - - -"):
+        regex1 = "\d\d/\d{2}/\d{4}"
+        regex2 = "\d{4}/\d{2}/\d{2}"
         try:
             if deadline == "- -/- -/- - - -":
                 self.cursor.execute("""UPDATE todos SET deadline=NULL WHERE id_todos=%s""", (id,))
+            elif not (re.match(regex1, deadline) or re.match(regex2, deadline)):
+                return False
             else:
                 self.cursor.execute("""UPDATE todos SET deadline=%s WHERE id_todos=%s""",
                                     (datetime.strptime(deadline, "%d/%m/%Y").strftime("%Y-%m-%d"), id))
-
             self.connection.commit()
-            print("Изменение date прошло успешно")
+            #print("Изменение date прошло успешно")
+            return True
         except (Exception, Error) as error:
             print("Ошибка при обновлении записи в PostgreSQL:", error)
 
