@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>icon2.png</file>
+    <file>icons8-unchecked-checkbox-100.png</file>
+    <file>icons8-checked-checkbox-100.png</file>
+    <file>icons8-generl-mandatory-action-100.png</file>
+    <file>icons8-general-mandatory-action-100.png</file>
+    <file>icons8-full-trash-100.png</file>
+    <file>icons8-fire-80 (1).png</file>
+    <file>icons8-fire-80 (3).png</file>
+    <file>icons8-отмеченный-чекбокс-100 (2).png</file>    
+  </qresource>
+</RCC>
